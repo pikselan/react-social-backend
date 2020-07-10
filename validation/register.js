@@ -26,7 +26,7 @@ module.exports = validateRegisterInput = (data) => {
   }
 
   if (Validator.isEmpty(data.passwordConfirm)) {
-    errors.password = "Confirm password field is required";
+    errors.passwordConfirm = "Confirm password field is required";
   }
 
   if (!Validator.isLength(data.password, { min: 8, max: 30 })) {
@@ -34,7 +34,7 @@ module.exports = validateRegisterInput = (data) => {
   }
 
   if (!Validator.equals(data.password, data.passwordConfirm)) {
-    errors.password = "Password must match";
+    errors.passwordConfirm = "Password must match";
   }
 
   return {
