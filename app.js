@@ -26,7 +26,7 @@ app.use(bodyParser.json());
 // config mongo
 const db = require("./config/keys").mongoUrl;
 mongoose
-  .connect(db, { useNewUrlParser: true })
+  .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("mongo connected"))
   .catch((err) => console.log(err));
 
@@ -48,7 +48,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-app.use("v1/api/users", usersApiRouter); // setup users api
+app.use("/v1/api/users", usersApiRouter); // setup users api
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
