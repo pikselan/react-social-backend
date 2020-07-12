@@ -15,6 +15,10 @@ var app = express();
 
 // ----------------- start setup
 
+// add cors exception
+var cors = require("cors");
+app.use(cors());
+
 // add body parser middleware to extract all item
 app.use(
   bodyParser.urlencoded({
@@ -48,7 +52,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-app.use("/v1/api/users", usersApiRouter); // setup users api
+app.use("/api/v1/users", usersApiRouter); // setup users api
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
