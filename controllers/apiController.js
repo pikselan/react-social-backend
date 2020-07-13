@@ -212,7 +212,9 @@ module.exports = {
           path: "comments",
           select: "id text userId timestamp",
           populate: { path: "userId", select: "username -_id" },
-        });
+          match: { isDelete: false },
+        })
+        .where({ isDelete: false });
 
       res.status(200).json(data);
     } catch (err) {

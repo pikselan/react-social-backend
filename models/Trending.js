@@ -11,7 +11,7 @@ const TrendingSchema = new Schema({
   posts: [
     {
       type: ObjectId,
-      ref: "Post",
+      ref: "posts",
       required: true,
     },
   ],
