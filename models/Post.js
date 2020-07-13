@@ -3,9 +3,9 @@ const { ObjectId } = mongoose.Schema;
 const Schema = mongoose.Schema;
 
 const PostSchema = new Schema({
-  user: {
+  userId: {
     type: ObjectId,
-    ref: "User",
+    ref: "users",
     required: true,
   },
   text: {
@@ -15,11 +15,12 @@ const PostSchema = new Schema({
   image: {
     type: String,
   },
-  tag: [
+  tags: [
     {
       type: String,
     },
   ],
+  comments: [{ type: ObjectId, ref: "comments" }],
   timestamp: {
     type: Date,
     default: Date.now,

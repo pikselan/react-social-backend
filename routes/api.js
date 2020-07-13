@@ -12,5 +12,6 @@ router.post("/login", apiController.loginUser);
 router.get("/@/:id", apiController.getUser);
 router.post("/post", apiController.addPost);
 router.post("/comment", apiController.addComment);
+router.get("/posts", apiController.getAllPost);
 
 module.exports = router;

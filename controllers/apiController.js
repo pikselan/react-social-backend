@@ -13,7 +13,7 @@ const { secretOrKey } = require("../config/keys");
 
 const verifyToken = (data) => {
   const token = data.replace("Bearer ", "");
-  return jwt.verify(token, secretOrKey);
+  return jwt.verify(token, secretOrKey, (err, data) => (err ? true : false));
 };
 
 module.exports = {
@@ -135,7 +135,7 @@ module.exports = {
   },
   addPost: async (req, res) => {
     try {
-      const { text, image, tag } = req.body;
+      const { text, image, tags } = req.body;
 
       if (!req.headers.authorization) {
         return res.status(404).json({ auth: "require authorization" });
@@ -153,10 +153,10 @@ module.exports = {
       );
 
       const newPost = new Post({
-        user: decoded.id,
+        userId: decoded.id,
         text,
         image,
-        tag,
+        tags,
       });
 
       await newPost.save().then((post) => res.json(post));
@@ -183,13 +183,38 @@ module.exports = {
         }
       );
 
-      const newComment = new Comment({
-        user: decoded.id,
+      const newComment = await Comment.create({
+        userId: decoded.id,
         text,
         postId,
       });
 
-      await newComment.save().then((comment) => res.json(comment));
+      const addCommentToPost = await Post.findById(postId);
+      addCommentToPost.comments.push(newComment._id);
+      await addCommentToPost.save();
+      res.status(200).json(newComment);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  },
+  getAllPost: async (req, res) => {
+    try {
+      if (!req.headers.authorization) {
+        return res.status(404).json({ auth: "require authorization" });
+      } else if (verifyToken(req.headers.authorization)) {
+        return res.status(404).json({ auth: "error authorization" });
+      }
+
+      const data = await Post.find()
+        .select("-isDelete -__v")
+        .populate({ path: "userId", select: "username -_id" })
+        .populate({
+          path: "comments",
+          select: "id text userId timestamp",
+          populate: { path: "userId", select: "username -_id" },
+        });
+
+      res.status(200).json(data);
     } catch (err) {
       res.status(500).json({ message: "Internal server error", error: err });
     }
