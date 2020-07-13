@@ -9,10 +9,12 @@ const UserSchema = new Schema({
   username: {
     type: String,
     required: true,
+    unique: true,
   },
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   password: {
     type: String,
@@ -20,9 +22,11 @@ const UserSchema = new Schema({
   },
   photo: {
     type: String,
+    default: "https://via.placeholder.com/80x80?text=Anon",
   },
   bio: {
     type: String,
+    default: "-",
   },
   timestamp: {
     type: Date,

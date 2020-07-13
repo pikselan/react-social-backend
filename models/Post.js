@@ -31,9 +31,7 @@ const PostSchema = new Schema({
   ],
   tag: [
     {
-      text: {
-        type: String,
-      },
+      type: String,
     },
   ],
   timestamp: {

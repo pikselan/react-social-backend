@@ -7,7 +7,7 @@ const mongoose = require("mongoose"); // add mongoose
 const bodyParser = require("body-parser"); // add body parser
 const passport = require("passport"); // add passport
 
-const usersApiRouter = require("./routes/api/users"); // add users api
+const usersApiRouter = require("./routes/api"); // add users api
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 
@@ -30,7 +30,11 @@ app.use(bodyParser.json());
 // config mongo
 const db = require("./config/keys").mongoUrl;
 mongoose
-  .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(db, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  })
   .then(() => console.log("mongo connected"))
   .catch((err) => console.log(err));
 
