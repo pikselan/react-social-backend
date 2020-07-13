@@ -15,20 +15,6 @@ const PostSchema = new Schema({
   image: {
     type: String,
   },
-  comments: [
-    {
-      user: {
-        type: ObjectId,
-        ref: "User",
-      },
-      text: {
-        type: String,
-      },
-      timestamp: {
-        type: Date,
-      },
-    },
-  ],
   tag: [
     {
       type: String,
@@ -37,6 +23,10 @@ const PostSchema = new Schema({
   timestamp: {
     type: Date,
     default: Date.now,
+  },
+  isDelete: {
+    type: Boolean,
+    default: false,
   },
 });
 

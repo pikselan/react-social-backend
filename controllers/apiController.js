@@ -4,6 +4,7 @@ const keys = require("../config/keys");
 
 const User = require("../models/User");
 const Post = require("../models/Post");
+const Comment = require("../models/Comment");
 const Trending = require("../models/Trending");
 
 const validateRegisterInput = require("../validation/register");
@@ -159,6 +160,36 @@ module.exports = {
       });
 
       await newPost.save().then((post) => res.json(post));
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  },
+  addComment: async (req, res) => {
+    try {
+      const { postId, text } = req.body;
+
+      if (!req.headers.authorization) {
+        return res.status(404).json({ auth: "require authorization" });
+      }
+
+      const decoded = jwt.verify(
+        req.headers.authorization.replace("Bearer ", ""),
+        secretOrKey,
+        (err, decoded) => {
+          if (err) {
+            res.status(404).json({ auth: "error authorization" });
+          }
+          return decoded;
+        }
+      );
+
+      const newComment = new Comment({
+        user: decoded.id,
+        text,
+        postId,
+      });
+
+      await newComment.save().then((comment) => res.json(comment));
     } catch (err) {
       res.status(500).json({ message: "Internal server error", error: err });
     }

@@ -2,19 +2,21 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 const Schema = mongoose.Schema;
 
-const TrendingSchema = new Schema({
-  text: {
-    type: String,
-    unique: true,
+const CommentSchema = new Schema({
+  postId: {
+    type: ObjectId,
+    ref: "Post",
     required: true,
   },
-  posts: [
-    {
-      type: ObjectId,
-      ref: "Post",
-      required: true,
-    },
-  ],
+  user: {
+    type: ObjectId,
+    ref: "User",
+    required: true,
+  },
+  text: {
+    type: String,
+    required: true,
+  },
   timestamp: {
     type: Date,
     default: Date.now,
@@ -25,4 +27,4 @@ const TrendingSchema = new Schema({
   },
 });
 
-module.exports = Trending = mongoose.model("trendings", TrendingSchema);
+module.exports = Comment = mongoose.model("comments", CommentSchema);
