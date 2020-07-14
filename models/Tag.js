@@ -2,19 +2,13 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 const Schema = mongoose.Schema;
 
-const TrendingSchema = new Schema({
-  text: {
+const TagSchema = new Schema({
+  tag: {
     type: String,
     unique: true,
     required: true,
   },
-  posts: [
-    {
-      type: ObjectId,
-      ref: "posts",
-      required: true,
-    },
-  ],
+  posts: [{ type: ObjectId, ref: "posts" }],
   timestamp: {
     type: Date,
     default: Date.now,
@@ -25,4 +19,4 @@ const TrendingSchema = new Schema({
   },
 });
 
-module.exports = Trending = mongoose.model("trendings", TrendingSchema);
+module.exports = Tag = mongoose.model("tags", TagSchema);

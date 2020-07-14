@@ -15,11 +15,7 @@ const PostSchema = new Schema({
   image: {
     type: String,
   },
-  tags: [
-    {
-      type: String,
-    },
-  ],
+  tags: [{ type: ObjectId, ref: "tags" }],
   comments: [{ type: ObjectId, ref: "comments" }],
   timestamp: {
     type: Date,

@@ -5,11 +5,12 @@ const keys = require("../config/keys");
 const User = require("../models/User");
 const Post = require("../models/Post");
 const Comment = require("../models/Comment");
-const Trending = require("../models/Trending");
+const Tag = require("../models/Tag");
 
 const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
 const { secretOrKey } = require("../config/keys");
+const { find } = require("../models/User");
 
 const verifyToken = (data) => {
   const token = data.replace("Bearer ", "");
@@ -152,14 +153,38 @@ module.exports = {
         }
       );
 
-      const newPost = new Post({
+      const newPost = await Post.create({
         userId: decoded.id,
         text,
         image,
-        tags,
       });
 
-      await newPost.save().then((post) => res.json(post));
+      let arrayTag = tags.map(async (data, index) => {
+        let arr = [];
+        await Tag.findOne({ tag: data })
+          .then(async (tag) => {
+            if (tag) {
+              tag.posts.push(newPost._id);
+              await tag.save().then((updateTag) => arr.push(updateTag._id));
+            } else {
+              await Tag.create({
+                tag: data,
+                posts: [newPost._id],
+              }).then((newTag) => arr.push(newTag._id));
+            }
+          })
+          .then(async () => {
+            // if (index === tags.length - 1) {
+            console.log(arr);
+            // await newPost.save();
+            // }
+          });
+        return 0;
+      });
+
+      console.log(arrayTag);
+
+      res.status(200).json(newPost);
     } catch (err) {
       res.status(500).json({ message: "Internal server error", error: err });
     }
@@ -212,6 +237,11 @@ module.exports = {
           path: "comments",
           select: "id text userId timestamp",
           populate: { path: "userId", select: "username -_id" },
+          match: { isDelete: false },
+        })
+        .populate({
+          path: "tags",
+          select: "id tag",
           match: { isDelete: false },
         })
         .where({ isDelete: false });
