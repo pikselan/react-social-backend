@@ -159,30 +159,28 @@ module.exports = {
         image,
       });
 
-      let arrayTag = tags.map(async (data, index) => {
-        let arr = [];
+      tags.map(async (data, index) => {
         await Tag.findOne({ tag: data })
           .then(async (tag) => {
             if (tag) {
               tag.posts.push(newPost._id);
-              await tag.save().then((updateTag) => arr.push(updateTag._id));
+              await tag
+                .save()
+                .then((updateTag) => newPost.tags.push(updateTag._id));
             } else {
               await Tag.create({
                 tag: data,
                 posts: [newPost._id],
-              }).then((newTag) => arr.push(newTag._id));
+              }).then((newTag) => newPost.tags.push(newTag._id));
             }
           })
           .then(async () => {
-            // if (index === tags.length - 1) {
-            console.log(arr);
-            // await newPost.save();
-            // }
+            if (newPost.tags.length === tags.length) {
+              console.log(newPost.tags);
+              await newPost.save();
+            }
           });
-        return 0;
       });
-
-      console.log(arrayTag);
 
       res.status(200).json(newPost);
     } catch (err) {
@@ -235,16 +233,37 @@ module.exports = {
         .populate({ path: "userId", select: "username -_id" })
         .populate({
           path: "comments",
-          select: "id text userId timestamp",
+          select: "text userId timestamp",
           populate: { path: "userId", select: "username -_id" },
           match: { isDelete: false },
         })
         .populate({
           path: "tags",
-          select: "id tag",
+          select: "tag",
           match: { isDelete: false },
         })
         .where({ isDelete: false });
+
+      res.status(200).json(data);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  },
+  getAllTag: async (req, res) => {
+    try {
+      if (!req.headers.authorization) {
+        return res.status(404).json({ auth: "require authorization" });
+      } else if (verifyToken(req.headers.authorization)) {
+        return res.status(404).json({ auth: "error authorization" });
+      }
+
+      const data = await Tag.find()
+        .select("-isDelete -__v")
+        .populate({
+          path: "posts",
+          select: "userId text image timestamp",
+          populate: { path: "userId", select: "username -_id" },
+        });
 
       res.status(200).json(data);
     } catch (err) {

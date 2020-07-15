@@ -13,5 +13,6 @@ router.get("/@/:id", apiController.getUser);
 router.post("/post", apiController.addPost);
 router.post("/comment", apiController.addComment);
 router.get("/posts", apiController.getAllPost);
+router.get("/tags", apiController.getAllTag);
 
 module.exports = router;
