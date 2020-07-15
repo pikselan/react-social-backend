@@ -229,11 +229,11 @@ module.exports = {
       }
 
       const data = await Post.find()
-        .select("-isDelete -__v")
+        .select("-isDelete -__v -created_at")
         .populate({ path: "userId", select: "username -_id" })
         .populate({
           path: "comments",
-          select: "text userId timestamp",
+          select: "text userId updatedAt",
           populate: { path: "userId", select: "username -_id" },
           match: { isDelete: false },
         })
@@ -258,12 +258,29 @@ module.exports = {
       }
 
       const data = await Tag.find()
-        .select("-isDelete -__v")
+        .select("-isDelete -__v -created_at")
         .populate({
           path: "posts",
-          select: "userId text image timestamp",
+          select: "userId text image updatedAt",
           populate: { path: "userId", select: "username -_id" },
         });
+
+      res.status(200).json(data);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  },
+  getListTag: async (req, res) => {
+    try {
+      if (!req.headers.authorization) {
+        return res.status(404).json({ auth: "require authorization" });
+      } else if (verifyToken(req.headers.authorization)) {
+        return res.status(404).json({ auth: "error authorization" });
+      }
+
+      const data = await Tag.find().select(
+        "-_id -isDelete -__v -posts -created_at"
+      );
 
       res.status(200).json(data);
     } catch (err) {

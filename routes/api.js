@@ -14,5 +14,6 @@ router.post("/post", apiController.addPost);
 router.post("/comment", apiController.addComment);
 router.get("/posts", apiController.getAllPost);
 router.get("/tags", apiController.getAllTag);
+router.get("/tag", apiController.getListTag);
 
 module.exports = router;
