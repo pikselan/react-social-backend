@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const keys = require("../config/keys");
+const fs = require("fs-extra");
 
 const User = require("../models/User");
 const Post = require("../models/Post");
@@ -136,8 +137,8 @@ module.exports = {
   },
   addPost: async (req, res) => {
     try {
-      const { text, image, tags } = req.body;
-
+      const { text, image } = req.body;
+      const tags = req.body.tags || [];
       if (!req.headers.authorization) {
         return res.status(404).json({ auth: "require authorization" });
       }
@@ -153,10 +154,18 @@ module.exports = {
         }
       );
 
+      const imageReplace = image.replace(/^data:image\/[a-z]+;base64,/, "");
+      let imageDecode = new Buffer(imageReplace, "base64");
+
+      const nameFile = `images/posts/${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2)}`;
+      fs.createWriteStream(`public/${nameFile}`).write(imageDecode);
+
       const newPost = await Post.create({
         userId: decoded.id,
         text,
-        image,
+        image: nameFile,
       });
 
       tags.map(async (data, index) => {
@@ -229,11 +238,11 @@ module.exports = {
       }
 
       const data = await Post.find()
-        .select("-isDelete -__v -created_at")
-        .populate({ path: "userId", select: "username -_id" })
+        .select("-isDelete -__v -updatedAt")
+        .populate({ path: "userId", select: "username name photo -_id" })
         .populate({
           path: "comments",
-          select: "text userId updatedAt",
+          select: "text userId created_at",
           populate: { path: "userId", select: "username -_id" },
           match: { isDelete: false },
         })
