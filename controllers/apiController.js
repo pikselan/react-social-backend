@@ -136,8 +136,10 @@ module.exports = {
   addPost: async (req, res) => {
     try {
       const { text } = req.body;
-      const tags = req.body.tags || [];
-      const imageFile = req.files.image;
+      let tags = [];
+      if (req.body.tags) {
+        tags = req.body.tags.split(",");
+      }
 
       if (!req.headers.authorization) {
         return res.status(404).json({ auth: "require authorization" });
@@ -155,7 +157,8 @@ module.exports = {
       );
 
       let newPost;
-      if (imageFile) {
+      if (req.files) {
+        const imageFile = req.files.image;
         const imagePath = `images/posts/${imageFile.name}`;
         imageFile.mv(`public/${imagePath}`, (err) => {
           if (err) {
@@ -195,7 +198,7 @@ module.exports = {
           })
           .then(async () => {
             if (newPost.tags.length === tags.length) {
-              console.log(newPost.tags);
+              // console.log(newPost.tags);
               await newPost.save();
             }
           });
