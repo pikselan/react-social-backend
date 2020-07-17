@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 const { ObjectId } = mongoose.Schema;
 const Schema = mongoose.Schema;
 
@@ -23,5 +24,7 @@ TagSchema.pre("validate", function (next) {
   this.postCount = this.posts.length;
   next();
 });
+
+TagSchema.plugin(mongoosePaginate);
 
 module.exports = Tag = mongoose.model("tags", TagSchema);
