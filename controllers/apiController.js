@@ -1,7 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const keys = require("../config/keys");
-const fs = require("fs-extra");
 
 const User = require("../models/User");
 const Post = require("../models/Post");
@@ -11,7 +10,6 @@ const Tag = require("../models/Tag");
 const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
 const { secretOrKey } = require("../config/keys");
-const { find } = require("../models/User");
 
 const verifyToken = (data) => {
   const token = data.replace("Bearer ", "");
@@ -137,8 +135,10 @@ module.exports = {
   },
   addPost: async (req, res) => {
     try {
-      const { text, image } = req.body;
+      const { text } = req.body;
       const tags = req.body.tags || [];
+      const imageFile = req.files.image;
+
       if (!req.headers.authorization) {
         return res.status(404).json({ auth: "require authorization" });
       }
@@ -154,19 +154,29 @@ module.exports = {
         }
       );
 
-      const imageReplace = image.replace(/^data:image\/[a-z]+;base64,/, "");
-      let imageDecode = new Buffer(imageReplace, "base64");
+      let newPost;
+      if (imageFile) {
+        const imagePath = `images/posts/${imageFile.name}`;
+        imageFile.mv(`public/${imagePath}`, (err) => {
+          if (err) {
+            console.log(err);
+            res
+              .status(500)
+              .json({ message: "Internal server error", error: err });
+          }
+        });
 
-      const nameFile = `images/posts/${Date.now()}_${Math.random()
-        .toString(36)
-        .substr(2)}`;
-      fs.createWriteStream(`public/${nameFile}`).write(imageDecode);
-
-      const newPost = await Post.create({
-        userId: decoded.id,
-        text,
-        image: nameFile,
-      });
+        newPost = await Post.create({
+          userId: decoded.id,
+          text,
+          image: imagePath,
+        });
+      } else {
+        newPost = await Post.create({
+          userId: decoded.id,
+          text,
+        });
+      }
 
       tags.map(async (data, index) => {
         await Tag.findOne({ tag: data })

@@ -6,6 +6,7 @@ var logger = require("morgan");
 const mongoose = require("mongoose"); // add mongoose
 const bodyParser = require("body-parser"); // add body parser
 const passport = require("passport"); // add passport
+const fileUpload = require("express-fileupload"); // add fileupload
 
 const usersApiRouter = require("./routes/api"); // add users api
 var indexRouter = require("./routes/index");
@@ -18,6 +19,9 @@ var app = express();
 // add cors exception
 var cors = require("cors");
 app.use(cors());
+
+// add fileupload handle
+app.use(fileUpload());
 
 // add body parser middleware to extract all item
 app.use(
