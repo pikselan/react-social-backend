@@ -258,13 +258,16 @@ module.exports = {
           select: "text userId created_at",
           populate: { path: "userId", select: "username -_id" },
           match: { isDelete: false },
+          limit: 5,
+          sort: { created_at: -1 },
         })
         .populate({
           path: "tags",
           select: "tag",
           match: { isDelete: false },
         })
-        .where({ isDelete: false });
+        .where({ isDelete: false })
+        .sort({ created_at: -1 });
 
       res.status(200).json(data);
     } catch (err) {
@@ -300,9 +303,10 @@ module.exports = {
         return res.status(404).json({ auth: "error authorization" });
       }
 
-      const data = await Tag.find().select(
-        "-_id -isDelete -__v -posts -created_at"
-      );
+      const data = await Tag.find()
+        .select("-_id -isDelete -__v -posts -created_at")
+        .limit(10)
+        .sort({ postCount: -1, updatedAt: -1 });
 
       res.status(200).json(data);
     } catch (err) {

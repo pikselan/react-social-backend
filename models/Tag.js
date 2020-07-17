@@ -10,6 +10,7 @@ const TagSchema = new Schema(
       required: true,
     },
     posts: [{ type: ObjectId, ref: "posts" }],
+    postCount: Number,
     isDelete: {
       type: Boolean,
       default: false,
@@ -17,5 +18,10 @@ const TagSchema = new Schema(
   },
   { timestamps: { createdAt: "created_at" } }
 );
+
+TagSchema.pre("validate", function (next) {
+  this.postCount = this.posts.length;
+  next();
+});
 
 module.exports = Tag = mongoose.model("tags", TagSchema);
