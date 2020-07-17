@@ -244,30 +244,38 @@ module.exports = {
   },
   getAllPost: async (req, res) => {
     try {
+      const page = req.params.id || 1;
       if (!req.headers.authorization) {
         return res.status(404).json({ auth: "require authorization" });
       } else if (verifyToken(req.headers.authorization)) {
         return res.status(404).json({ auth: "error authorization" });
       }
 
-      const data = await Post.find()
-        .select("-isDelete -__v -updatedAt")
-        .populate({ path: "userId", select: "username name photo -_id" })
-        .populate({
-          path: "comments",
-          select: "text userId created_at",
-          populate: { path: "userId", select: "username -_id" },
-          match: { isDelete: false },
-          limit: 5,
+      const data = await Post.paginate(
+        { isDelete: false },
+        {
+          page,
+          limit: 10,
+          select: "-isDelete -__v -updatedAt",
           sort: { created_at: -1 },
-        })
-        .populate({
-          path: "tags",
-          select: "tag",
-          match: { isDelete: false },
-        })
-        .where({ isDelete: false })
-        .sort({ created_at: -1 });
+          populate: [
+            {
+              path: "comments",
+              select: "text userId created_at",
+              populate: { path: "userId", select: "username -_id" },
+              match: { isDelete: false },
+              limit: 5,
+              sort: { created_at: -1 },
+            },
+            {
+              path: "userId",
+              select: "username name photo -_id",
+              match: { isDelete: false },
+            },
+            { path: "tags", select: "tag", match: { isDelete: false } },
+          ],
+        }
+      );
 
       res.status(200).json(data);
     } catch (err) {
