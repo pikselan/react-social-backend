@@ -204,6 +204,22 @@ module.exports = {
           });
       });
 
+      newPost = await newPost
+        .populate({ path: "userId", select: "username name photo -_id" })
+        .populate({
+          path: "comments",
+          select: "text userId created_at",
+          populate: { path: "userId", select: "username -_id" },
+          match: { isDelete: false },
+          limit: 5,
+        })
+        .populate({
+          path: "tags",
+          select: "tag",
+          match: { isDelete: false },
+        })
+        .execPopulate();
+
       res.status(200).json(newPost);
     } catch (err) {
       res.status(500).json({ message: "Internal server error", error: err });
@@ -262,10 +278,10 @@ module.exports = {
             {
               path: "comments",
               select: "text userId created_at",
-              populate: { path: "userId", select: "username -_id" },
-              match: { isDelete: false },
-              limit: 5,
               sort: { created_at: -1 },
+              populate: { path: "userId", select: "username -_id" },
+              limit: 4,
+              match: { isDelete: false },
             },
             {
               path: "userId",
@@ -308,10 +324,10 @@ module.exports = {
                 {
                   path: "comments",
                   select: "text userId created_at",
-                  populate: { path: "userId", select: "username -_id" },
-                  match: { isDelete: false },
-                  limit: 5,
                   sort: { created_at: -1 },
+                  populate: { path: "userId", select: "username -_id" },
+                  limit: 4,
+                  match: { isDelete: false },
                 },
                 {
                   path: "userId",

@@ -19,6 +19,7 @@ const PostSchema = new Schema(
     },
     tags: [{ type: ObjectId, ref: "tags" }],
     comments: [{ type: ObjectId, ref: "comments" }],
+    commentCount: Number,
     isDelete: {
       type: Boolean,
       default: false,
@@ -26,6 +27,11 @@ const PostSchema = new Schema(
   },
   { timestamps: { createdAt: "created_at" } }
 );
+
+PostSchema.pre("validate", function (next) {
+  this.commentCount = this.comments.length;
+  next();
+});
 
 PostSchema.plugin(mongoosePaginate);
 
