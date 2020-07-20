@@ -298,6 +298,49 @@ module.exports = {
       res.status(500).json({ message: "Internal server error", error: err });
     }
   },
+  getUserPost: async (req, res) => {
+    try {
+      const username = req.params.username;
+      const page = req.params.page || 1;
+      if (!req.headers.authorization) {
+        return res.status(404).json({ auth: "require authorization" });
+      } else if (verifyToken(req.headers.authorization)) {
+        return res.status(404).json({ auth: "error authorization" });
+      }
+
+      await User.findOne({ username }).then(async (user) => {
+        const data = await Post.paginate(
+          { userId: `${user._id}`, isDelete: false },
+          {
+            page,
+            limit: 10,
+            select: "-isDelete -__v -updatedAt",
+            sort: { created_at: -1 },
+            populate: [
+              {
+                path: "comments",
+                select: "text userId created_at",
+                sort: { created_at: -1 },
+                populate: { path: "userId", select: "username -_id" },
+                limit: 4,
+                match: { isDelete: false },
+              },
+              {
+                path: "userId",
+                select: "username name photo -_id",
+                match: { isDelete: false },
+              },
+              { path: "tags", select: "tag", match: { isDelete: false } },
+            ],
+          }
+        );
+
+        res.status(200).json(data);
+      });
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error", error: err });
+    }
+  },
   getAllTag: async (req, res) => {
     try {
       const page = req.params.page || 1;
@@ -309,7 +352,7 @@ module.exports = {
       }
 
       const data = await Tag.paginate(
-        { tag: `#${tag}` },
+        { tag: `#${tag}`, isDelete: false },
         {
           page,
           limit: 10,
